@@ -1,31 +1,22 @@
 """
-Specialist Agent: Stop Reparto (Light Version)
---------------------------------------------
-Generates business recommendations using official Google Generative AI SDK.
+Specialist Agent: Stop Reparto (Ultra-Light REST Version)
+-------------------------------------------------------
+Generates business recommendations using direct REST calls to Gemini API.
 """
 
 import json
 import os
 from typing import List, Dict, Any
 from pathlib import Path
-import google.generativeai as genai
-from pydantic import BaseModel, Field
-
-class AgentRecommendation(BaseModel):
-    """Schema for agent recommendation output."""
-    titulo: str
-    objetivo: str
-    stop_permitido: bool
-    speech_sugerido: str
-    siguiente_paso: str
-    gestion_finalizada: bool = False
+import httpx
 
 class StopRepartoAgent:
     """Specialist for the STOP_REPARTO process at Aquaservice."""
     
     def __init__(self, model_name: str = "gemini-2.0-flash-exp"):
-        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-        self.model = genai.GenerativeModel(model_name)
+        self.model_name = model_name
+        self.api_key = os.getenv("GOOGLE_API_KEY")
+        self.api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={self.api_key}"
         self.policy_text = self._load_policy()
     
     def _load_policy(self) -> str:
@@ -66,16 +57,28 @@ FORMATO DE SALIDA (JSON):
   "gestion_finalizada": true/false
 }}"""
 
-        prompt = f"{system_prompt}\n\nCONVERSACIÓN:\n{conversation_text}\n\nCONTEXTO:\n{json.dumps(customer_context)}\n\nRespuesta JSON:"
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": f"{system_prompt}\n\nCONVERSACIÓN:\n{conversation_text}\n\nCONTEXTO:\n{json.dumps(customer_context)}\n\nRespuesta JSON:"
+                }]
+            }],
+            "generationConfig": {
+                "response_mime_type": "application/json",
+                "temperature": 0.5
+            }
+        }
         
         try:
-            response = self.model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
-            )
-            return json.loads(response.text)
+            with httpx.Client(timeout=30.0) as client:
+                response = client.post(self.api_url, json=payload)
+                response.raise_for_status()
+                result = response.json()
+                
+                content_text = result['candidates'][0]['content']['parts'][0]['text']
+                return json.loads(content_text)
         except Exception as e:
-            print(f"Error in StopRepartoAgent: {e}")
+            print(f"Error in StopRepartoAgent (REST): {e}")
             return {
                 "titulo": "Error en Recomendación",
                 "objetivo": "Soporte",

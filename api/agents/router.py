@@ -1,27 +1,23 @@
 """
-Router Agent (Light Version)
+Router Agent (Ultra-Light REST Version)
 ------------
-Analyzes customer conversation using official Google Generative AI SDK.
+Analyzes customer conversation using direct REST calls to Gemini API.
+No heavy dependencies.
 """
 
 import json
 import os
 from typing import List, Dict, Any
-import google.generativeai as genai
+import httpx
 from pydantic import BaseModel, Field
-
-class ProcessDetection(BaseModel):
-    """Schema for process detection output."""
-    process: str = Field(description="The detected process name (e.g., STOP_REPARTO)")
-    confidence: float = Field(description="Confidence score between 0 and 1")
-    extracted_data: Dict[str, Any] = Field(default_factory=dict, description="Fields extracted from conversation")
 
 class RouterAgent:
     """Detects which business process applies to a customer conversation."""
     
     def __init__(self, model_name: str = "gemini-2.0-flash-exp"):
-        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-        self.model = genai.GenerativeModel(model_name)
+        self.model_name = model_name
+        self.api_key = os.getenv("GOOGLE_API_KEY")
+        self.api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={self.api_key}"
         
     def detect_process(self, messages: List[str]) -> Dict[str, Any]:
         conversation_text = "\n".join(messages)
@@ -45,14 +41,27 @@ FORMATO DE SALIDA (JSON ESTRICTO):
   "extracted_data": {"campo": "valor"}
 }"""
 
-        prompt = f"{system_prompt}\n\nCONVERSACIÓN:\n{conversation_text}\n\nRespuesta JSON:"
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": f"{system_prompt}\n\nCONVERSACIÓN:\n{conversation_text}\n\nRespuesta JSON:"
+                }]
+            }],
+            "generationConfig": {
+                "response_mime_type": "application/json",
+                "temperature": 0.1
+            }
+        }
         
         try:
-            response = self.model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
-            )
-            return json.loads(response.text)
+            with httpx.Client(timeout=30.0) as client:
+                response = client.post(self.api_url, json=payload)
+                response.raise_for_status()
+                result = response.json()
+                
+                # Extract text from Gemini response structure
+                content_text = result['candidates'][0]['content']['parts'][0]['text']
+                return json.loads(content_text)
         except Exception as e:
-            print(f"Error in RouterAgent: {e}")
+            print(f"Error in RouterAgent (REST): {e}")
             return {"process": "UNKNOWN", "confidence": 0, "extracted_data": {}}
