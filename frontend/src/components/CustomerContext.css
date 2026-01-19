@@ -7,14 +7,14 @@
 
 .customer-context h2 {
     margin-bottom: 5px;
-    color: #667eea;
+    color: var(--aqua-dark);
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
 .editor-container {
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--aqua-light);
     border-radius: 8px;
     overflow: hidden;
     margin-bottom: 15px;
@@ -78,6 +78,6 @@
 }
 
 .help-section code {
-    color: #805ad5;
+    color: var(--aqua-light);
     font-weight: 600;
 }

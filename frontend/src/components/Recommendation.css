@@ -8,7 +8,7 @@
 
 .recommendation h2 {
     margin-bottom: 20px;
-    color: #667eea;
+    color: var(--aqua-dark);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -27,7 +27,7 @@
     width: 40px;
     height: 40px;
     border: 4px solid #e2e8f0;
-    border-top-color: #667eea;
+    border-top-color: var(--aqua-light);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 15px;
@@ -327,7 +327,7 @@
 }
 
 .copy-button {
-    background: #667eea;
+    background: var(--aqua-light);
     color: white;
     font-size: 12px;
     padding: 6px 12px;
@@ -364,7 +364,7 @@
 }
 
 .speech-content strong {
-    color: #1a202c;
+    color: var(--aqua-dark);
     font-weight: 700;
 }
 

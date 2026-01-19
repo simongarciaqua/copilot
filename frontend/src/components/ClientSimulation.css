@@ -7,7 +7,7 @@
 
 .client-simulation h2 {
     margin-bottom: 5px;
-    color: #667eea;
+    color: var(--aqua-dark);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -62,13 +62,13 @@
 }
 
 .message-bubble {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--aqua-light) 0%, var(--aqua-dark) 100%);
     color: white;
     padding: 12px 16px;
     border-radius: 18px 18px 4px 18px;
     max-width: 85%;
     word-wrap: break-word;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(15, 46, 125, 0.2);
 }
 
 .message-time {
@@ -90,7 +90,7 @@
 }
 
 .send-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--aqua-light) 0%, var(--aqua-dark) 100%);
     color: white;
     padding: 12px 24px;
     font-weight: 600;
