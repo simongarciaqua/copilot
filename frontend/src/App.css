@@ -17,14 +17,12 @@
 .app-header h1 {
     font-size: 32px;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--aqua-dark);
 }
 
 .tagline {
-    color: #718096;
+    color: var(--aqua-dark);
+    opacity: 0.8;
     font-size: 14px;
 }
 
@@ -96,5 +94,5 @@
 
 .app-footer .status {
     font-weight: 600;
-    color: #667eea;
+    color: var(--aqua-dark);
 }
