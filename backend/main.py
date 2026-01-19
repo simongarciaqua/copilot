@@ -77,7 +77,7 @@ def get_stop_reparto_agent():
     return stop_reparto_agent
 
 
-@app.get("/health")
+@app.get("/api/health")
 async def health_check():
     """Health check endpoint."""
     return {
@@ -87,7 +87,7 @@ async def health_check():
     }
 
 
-@app.post("/analyze", response_model=AnalyzeResponse)
+@app.post("/api/analyze", response_model=AnalyzeResponse)
 async def analyze_conversation(request: AnalyzeRequest):
     """
     Analyze a customer conversation and generate recommendations.
@@ -198,7 +198,7 @@ async def analyze_conversation(request: AnalyzeRequest):
         )
 
 
-@app.get("/processes")
+@app.get("/api/processes")
 async def list_processes():
     """List available processes."""
     base_path = Path(__file__).parent.parent

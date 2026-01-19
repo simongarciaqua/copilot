@@ -1,0 +1,40 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "backend/main.py",
+            "use": "@vercel/python",
+            "config": {
+                "includeFiles": "stop_reparto/**"
+            }
+        },
+        {
+            "src": "frontend/package.json",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "dist"
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "backend/main.py"
+        },
+        {
+            "src": "/assets/(.*)",
+            "dest": "frontend/dist/assets/$1",
+            "check": true
+        },
+        {
+            "src": "/(.*)",
+            "dest": "frontend/dist/$1",
+            "check": true
+        },
+        {
+            "src": "/(.*)",
+            "status": 404,
+            "dest": "frontend/dist/index.html"
+        }
+    ]
+}

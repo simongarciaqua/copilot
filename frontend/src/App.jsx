@@ -34,7 +34,8 @@ function App() {
         setError(null);
 
         try {
-            const response = await fetch('http://localhost:8000/analyze', {
+            const apiBase = import.meta.env.VITE_API_URL || '';
+            const response = await fetch(`${apiBase}/api/analyze`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
