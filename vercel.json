@@ -2,11 +2,8 @@
     "version": 2,
     "builds": [
         {
-            "src": "backend/main.py",
-            "use": "@vercel/python",
-            "config": {
-                "excludeFiles": "frontend/**"
-            }
+            "src": "api/index.py",
+            "use": "@vercel/python"
         },
         {
             "src": "frontend/package.json",
@@ -16,25 +13,15 @@
             }
         }
     ],
-    "routes": [
+    "rewrites": [
         {
-            "src": "/api/(.*)",
-            "dest": "backend/main.py"
+            "source": "/api/(.*)",
+            "destination": "api/index.py"
         },
         {
-            "src": "/assets/(.*)",
-            "dest": "frontend/dist/assets/$1",
+            "source": "/(.*)",
+            "destination": "frontend/$1",
             "check": true
-        },
-        {
-            "src": "/(.*)",
-            "dest": "frontend/dist/$1",
-            "check": true
-        },
-        {
-            "src": "/(.*)",
-            "status": 404,
-            "dest": "frontend/dist/index.html"
         }
     ]
 }
