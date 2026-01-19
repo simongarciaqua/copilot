@@ -47,3 +47,4 @@ frontend/dist/
 
 # OS
 .DS_Store
+venv_local/
