@@ -5,7 +5,6 @@
             "src": "backend/main.py",
             "use": "@vercel/python",
             "config": {
-                "includeFiles": "stop_reparto/**",
                 "excludeFiles": "frontend/**"
             }
         },

@@ -45,7 +45,7 @@ class StopRepartoAgent:
     
     def _load_policy(self) -> str:
         """Load the policy document for this process."""
-        base_path = Path(__file__).parent.parent.parent
+        base_path = Path(__file__).parent.parent
         policy_path = base_path / "stop_reparto" / "policy_stop_reparto.txt"
         
         with open(policy_path, 'r', encoding='utf-8') as f:

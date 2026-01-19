@@ -201,19 +201,22 @@ async def analyze_conversation(request: AnalyzeRequest):
 @app.get("/api/processes")
 async def list_processes():
     """List available processes."""
-    base_path = Path(__file__).parent.parent
+    base_path = Path(__file__).parent
     processes = []
     
     # Scan for process directories
     for item in base_path.iterdir():
-        if item.is_dir() and not item.name.startswith('.') and item.name != 'backend' and item.name != 'frontend':
-            rules_file = item / f"rules_{item.name}.json"
-            if rules_file.exists():
-                processes.append({
-                    "name": item.name.upper(),
-                    "has_rules": True,
-                    "has_policy": (item / f"policy_{item.name}.txt").exists()
-                })
+        if item.is_dir() and not item.name.startswith('.') and item.name not in ['agents', 'rules_engine', 'stop_reparto']:
+            # Maybe it's a new process folder?
+            pass
+            
+    # Always include STOP_REPARTO if it exists
+    if (base_path / "stop_reparto").exists():
+        processes.append({
+            "name": "STOP_REPARTO",
+            "has_rules": True,
+            "has_policy": True
+        })
     
     return {"processes": processes}
 

@@ -171,7 +171,7 @@ def load_rules_engine(process_name: str) -> RulesEngine:
         RulesEngine instance for the process
     """
     # Construct path to rules file
-    base_path = Path(__file__).parent.parent.parent
+    base_path = Path(__file__).parent.parent
     rules_path = base_path / process_name.lower() / f"rules_{process_name.lower()}.json"
     
     return RulesEngine(str(rules_path))
