@@ -1,14 +1,17 @@
-# Exclude heavy local folders from Vercel upload
-venv_local/
-frontend/node_modules/
-node_modules/
-.git/
-dist/
-frontend/dist/
-**/__pycache__/
+# Evitar que archivos locales pesados inflen el build de Vercel
+**/node_modules
+**/venv
+**/venv_local
+.git
+frontend/src
+MIGRATION_GEMINI.md
+README.md
+start.sh
+**/__pycache__
 *.pyc
 .env
-frontend/src/
+api/.env
 package-lock.json
-**/venv/
-**/env/
+frontend/package-lock.json
+dist/
+**/dist
