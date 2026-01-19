@@ -1,0 +1,100 @@
+.app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-header {
+    text-align: center;
+    padding: 30px 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.app-header h1 {
+    font-size: 32px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.tagline {
+    color: #718096;
+    font-size: 14px;
+}
+
+.error-banner {
+    background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideDown 0.3s ease;
+    box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.error-banner button {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 4px 12px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.panels-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    flex: 1;
+    align-items: start;
+}
+
+@media (max-width: 1400px) {
+    .panels-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.panel {
+    min-width: 0;
+}
+
+.app-footer {
+    margin-top: 30px;
+    padding: 20px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.app-footer p {
+    font-size: 13px;
+    color: #718096;
+    margin: 0;
+}
+
+.app-footer .status {
+    font-weight: 600;
+    color: #667eea;
+}
