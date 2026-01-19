@@ -1,5 +1,11 @@
-from .router import RouterAgent, create_router_agent
-from .stop_reparto_agent import StopRepartoAgent, create_stop_reparto_agent
+from .router import RouterAgent
+from .stop_reparto_agent import StopRepartoAgent
+
+def create_router_agent():
+    return RouterAgent()
+
+def create_stop_reparto_agent():
+    return StopRepartoAgent()
 
 __all__ = [
     "RouterAgent",
