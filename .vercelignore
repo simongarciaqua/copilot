@@ -3,7 +3,6 @@
 **/venv
 **/venv_local
 .git
-frontend/src
 MIGRATION_GEMINI.md
 README.md
 start.sh
