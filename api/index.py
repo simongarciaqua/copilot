@@ -18,7 +18,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Add the current directory to sys.path to fix imports in Vercel
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
 
 # Load environment variables
 load_dotenv()
