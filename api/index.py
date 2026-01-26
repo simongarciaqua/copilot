@@ -13,8 +13,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 import os
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
+
+# Add the current directory to sys.path to fix imports in Vercel
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Load environment variables
 load_dotenv()
