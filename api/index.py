@@ -11,18 +11,10 @@ import os
 import sys
 from pathlib import Path
 
-# Path hack for Vercel imports
-current_dir = Path(__file__).parent.resolve()
-parent_dir = current_dir.parent.resolve()
-
-if str(current_dir) not in sys.path:
-    sys.path.insert(0, str(current_dir))
-if str(parent_dir) not in sys.path:
-    sys.path.insert(0, str(parent_dir))
-
-# Debug info for Vercel logs
-print(f"DEBUG: Python Path: {sys.path}")
-print(f"DEBUG: Current Dir: {current_dir}")
+# Fix paths for Vercel
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
@@ -34,8 +26,13 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-from rules_engine import load_rules_engine
-from agents import create_router_agent, create_stop_reparto_agent, create_aviso_urgente_agent
+# Universal imports (works local and Vercel)
+try:
+    from rules_engine import load_rules_engine
+    from agents import create_router_agent, create_stop_reparto_agent, create_aviso_urgente_agent
+except ImportError:
+    from api.rules_engine import load_rules_engine
+    from api.agents import create_router_agent, create_stop_reparto_agent, create_aviso_urgente_agent
 
 
 # Request/Response Models
