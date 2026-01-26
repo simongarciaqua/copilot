@@ -1,70 +1,66 @@
 .app {
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .app-header {
     text-align: center;
-    padding: 30px 20px;
+    padding: 15px 20px;
+    /* Reduced padding */
     background: rgba(255, 255, 255, 0.95);
     border-radius: 16px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
+    flex-shrink: 0;
+    /* Header shouldn't shrink */
 }
 
 .app-header h1 {
-    font-size: 32px;
-    margin-bottom: 8px;
+    font-size: 24px;
+    /* Slightly smaller */
+    margin-bottom: 4px;
     color: var(--aqua-dark);
 }
 
 .tagline {
     color: var(--aqua-dark);
     opacity: 0.8;
-    font-size: 14px;
+    font-size: 13px;
 }
 
+/* ... keep error-banner ... */
 .error-banner {
     background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
     color: white;
-    padding: 15px 20px;
+    padding: 10px 20px;
     border-radius: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     animation: slideDown 0.3s ease;
     box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+    flex-shrink: 0;
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.error-banner button {
-    background: rgba(255, 255, 255, 0.3);
-    color: white;
-    padding: 4px 12px;
-    font-size: 16px;
-    font-weight: bold;
-}
+/* ... animations ... */
 
 .panels-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     flex: 1;
-    align-items: start;
+    min-height: 0;
+    /* Important for flex container to not overflow */
+    align-items: stretch;
+    /* Stretch panels to full height */
+    overflow: hidden;
+    /* Prevent container scroll */
 }
 
 @media (max-width: 1400px) {
@@ -75,19 +71,23 @@
 
 .panel {
     min-width: 0;
+    height: 100%;
+    overflow: hidden;
+    /* Ensure content inside panel handles scrolling */
 }
 
 .app-footer {
-    margin-top: 30px;
-    padding: 20px;
+    margin-top: 15px;
+    padding: 10px;
     text-align: center;
     background: rgba(255, 255, 255, 0.8);
     border-radius: 12px;
     backdrop-filter: blur(10px);
+    flex-shrink: 0;
 }
 
 .app-footer p {
-    font-size: 13px;
+    font-size: 12px;
     color: #718096;
     margin: 0;
 }

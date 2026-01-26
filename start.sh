@@ -6,13 +6,13 @@ echo "======================================"
 echo ""
 
 # Check if OPENAI_API_KEY is set
-if [ ! -f backend/.env ]; then
-    echo "⚠️  No .env file found in backend/"
+if [ ! -f api/.env ]; then
+    echo "⚠️  No .env file found in api/"
     echo ""
     echo "Creating .env file from template..."
-    cp backend/.env.example backend/.env
+    cp api/.env.example api/.env
     echo ""
-    echo "📝 Please edit backend/.env and add your GOOGLE_API_KEY"
+    echo "📝 Please edit api/.env and add your GOOGLE_API_KEY"
     echo "   Get your key at: https://makersuite.google.com/app/apikey"
     echo "   Then run this script again."
     echo ""
@@ -20,9 +20,9 @@ if [ ! -f backend/.env ]; then
 fi
 
 # Check if venv exists
-if [ ! -d "backend/venv" ]; then
+if [ ! -d "api/venv" ]; then
     echo "📦 Creating Python virtual environment..."
-    cd backend
+    cd api
     python3 -m venv venv
     cd ..
     echo "✅ Virtual environment created"
@@ -30,9 +30,9 @@ if [ ! -d "backend/venv" ]; then
 fi
 
 # Check if dependencies are installed
-if [ ! -f "backend/venv/bin/uvicorn" ]; then
+if [ ! -f "api/venv/bin/uvicorn" ]; then
     echo "📦 Installing backend dependencies..."
-    cd backend
+    cd api
     ./venv/bin/pip install -r requirements.txt > /dev/null 2>&1
     cd ..
     echo "✅ Backend dependencies installed"
@@ -69,8 +69,8 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 # Start backend
-cd backend
-./venv/bin/python main.py &
+cd api
+./venv/bin/python index.py &
 BACKEND_PID=$!
 cd ..
 

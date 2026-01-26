@@ -1,5 +1,5 @@
 """
-Specialist Agent: Stop Reparto (Full Quality REST Version)
+Specialist Agent: Aviso Urgente (Full Quality REST Version)
 -------------------------------------------------------
 Generates high-quality business recommendations following the official manual.
 """
@@ -10,8 +10,8 @@ from typing import List, Dict, Any
 from pathlib import Path
 import httpx
 
-class StopRepartoAgent:
-    """Specialist for the STOP_REPARTO process at Aquaservice."""
+class AvisoUrgenteAgent:
+    """Specialist for the AVISO_URGENTE process at Aquaservice."""
     
     def __init__(self, model_name: str = "gemini-2.0-flash-exp"):
         self.model_name = model_name
@@ -21,7 +21,7 @@ class StopRepartoAgent:
     
     def _load_policy(self) -> str:
         base_path = Path(__file__).parent.parent
-        policy_path = base_path / "stop_reparto" / "policy_stop_reparto.txt"
+        policy_path = base_path / "aviso_urgente" / "policy_aviso_urgente.txt"
         with open(policy_path, 'r', encoding='utf-8') as f:
             return f.read()
     
@@ -33,34 +33,42 @@ class StopRepartoAgent:
     ) -> Dict[str, Any]:
         conversation_text = "\n".join(messages)
         
-        system_prompt = f"""Eres el Especialista en Stop Reparto de Aquaservice. Tu misión es maximizar la satisfacción y el FCR siguiendo la política oficial.
+        system_prompt = f"""Eres el Especialista en Aviso Urgente de Aquaservice. Tu misión es gestionar la creación de avisos urgentes o informar de su imposibilidad según la política.
 
 POLÍTICA OFICIAL:
 {self.policy_text}
 
-REGLAS DE NEGOCIO (VINCULANTES):
+REGLAS DE NEGOCIO (DECISIÓN TÉCNICA):
 {json.dumps(rules_decision, indent=2, ensure_ascii=False)}
 
 CONTEXTO DEL CLIENTE:
 {json.dumps(customer_context, indent=2, ensure_ascii=False)}
 
-INSTRUCCIONES CRÍTICAS:
-1. CANAL: El campo `canal` del `customer_context` es CRÍTICO para el formato del `speech_sugerido`.
-2. FORMATO POR CANAL (CRÍTICO):
-   - CANAL 'Telefono': NO generes un párrafo largo. Usa Bullet Points cortos y claros con negritas para que el agente lo lea de un vistazo.
-   - CANAL 'Chat': Genera un 'speech_sugerido' natural y conversacional listo para copiar y pegar.
-3. NO REPETIR PREGUNTAS: Si la información ya está en el chat o en el contexto, no la vuelvas a pedir.
-4. FLUJO DE DECISIÓN: Si el cliente ya rechazó alternativas, pasa directo a la DECISIÓN técnica.
-5. COSTES: Respeta escrupulosamente los costes de anulación indicados en las REGLAS DE NEGOCIO basándote en el scoring y el plan.
-6. CRM: El campo `siguiente_paso` debe contener la instrucción técnica exacta para Salesforce (ej: "Marcar check Anular Reparto en el pedido pedagógico").
+INSTRUCCIONES CLAVE:
+0. NO REPETIR PREGUNTAS: Si ya tenemos el producto o cantidad, pasa directo a validación.
+1. FORMATO POR CANAL (CRÍTICO):
+   - CANAL 'Telefono': Usa Bullet Points cortos y legibles con negritas. Evita párrafos largos.
+   - CANAL 'Chat': Proporciona un guion conversacional completo en 'speech_sugerido'.
+2. SI LA DECISIÓN ES 'RECHAZO_*':
+   - NO puedes crear el aviso.
+   - Debes informar al cliente el motivo usando EXACTAMENTE los 'ESCENARIOS DE RECHAZO' del manual.
+   - Sé empático pero firme.
 
-FORMATO DE SALIDA (JSON):
+3. SI LA DECISIÓN ES 'AVISO_URGENTE_PERMITIDO':
+   - Verifica si tenemos 'producto' y 'cantidad' en el CONTEXTO DEL CLIENTE o en la CONVERSACIÓN ACTUAL.
+   - Si FALTAN datos: Pregunta por ellos (Paso 1 del Flujo).
+   - Si TIENES datos: Verifica los MÍNIMOS (Paso 2).
+     - Agua: min 1 botella.
+     - Café: min 3 cajas.
+   - Si cumple mínimos: CONFIRMA la creación e informa del plazo (Paso 3 y 4).
+
+3. FORMATO SALIDA (JSON):
 {{
-  "titulo": "Resumen corto de la fase actual",
-  "objetivo": "Reconducción | Decisión | FCR",
-  "stop_permitido": true | false,
-  "speech_sugerido": "Guion exacto para el agente",
-  "siguiente_paso": "Acción técnica en CRM/Salesforce",
+  "titulo": "Resumen fase actual (ej: Validación, Solicitud Datos, Confirmación)",
+  "objetivo": "Informar Rechazo | Pedir Datos | Confirmar Creación",
+  "aviso_permitido": true | false,
+  "speech_sugerido": "Guion para el agente",
+  "siguiente_paso": "Acción técnica (ej: Crear Case Salesforce, Nada)",
   "gestion_finalizada": true | false
 }}"""
 
@@ -72,7 +80,7 @@ FORMATO DE SALIDA (JSON):
             }],
             "generationConfig": {
                 "response_mime_type": "application/json",
-                "temperature": 0.4
+                "temperature": 0.3
             }
         }
         
@@ -83,10 +91,9 @@ FORMATO DE SALIDA (JSON):
                 result = response.json()
                 content_text = result['candidates'][0]['content']['parts'][0]['text']
                 data = json.loads(content_text)
-                # Handle case where Gemini returns a list instead of a dict
                 if isinstance(data, list) and len(data) > 0:
                     return data[0]
                 return data
         except Exception as e:
-            print(f"Error in StopRepartoAgent: {e}")
+            print(f"Error in AvisoUrgenteAgent: {e}")
             return {"titulo": "Error", "speech_sugerido": "Error al conectar con la IA."}

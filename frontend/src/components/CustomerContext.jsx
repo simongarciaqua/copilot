@@ -9,7 +9,15 @@ const DEFAULT_CONTEXT = {
     stops_ultimo_ano: 1,
     albaran_descargado: false,
     tipo_cliente: "residencial",
-    canal: "Telefono"
+    canal: "Telefono",
+    // Aviso Urgente Fields
+    is_delivery_day: false,
+    has_pending_usual_delivery: false,
+    has_pending_crm_delivery: false,
+    urgent_notice_allowed_zone: true,
+    next_delivery_hours: 72,
+    route_type: "Normal", // Normal | Megaruta
+    pending_crm_hours: 24 // Horas desde creación del albarán CRM
 };
 
 export default function CustomerContext({ context, onContextChange, onUpdate }) {
@@ -54,7 +62,7 @@ export default function CustomerContext({ context, onContextChange, onUpdate }) 
 
             <div className="editor-container">
                 <Editor
-                    height="400px"
+                    height="100%"
                     defaultLanguage="json"
                     value={editorValue}
                     onChange={handleEditorChange}
@@ -87,16 +95,25 @@ export default function CustomerContext({ context, onContextChange, onUpdate }) 
             </button>
 
             <div className="help-section">
-                <h4>📚 Campos disponibles:</h4>
-                <ul>
-                    <li><code>plan</code>: Plan contratado (Ahorro, Planocho)</li>
-                    <li><code>scoring</code>: Puntuación del cliente (0-5)</li>
-                    <li><code>motivo</code>: Motivo (exceso_agua, ausencia_vacaciones, null)</li>
-                    <li><code>stops_ultimo_ano</code>: Número de stops previos</li>
-                    <li><code>albaran_descargado</code>: true si es el mismo día de ruta</li>
-                    <li><code>tipo_cliente</code>: residencial, residencial_user, residencial_ma</li>
-                    <li><code>canal</code>: Chat o Telefono (afecta al formato del speech)</li>
-                </ul>
+                <details>
+                    <summary>📚 Campos disponibles (Ver leyenda)</summary>
+                    <ul>
+                        <li><code>plan</code>: Plan contratado (Ahorro, Planocho)</li>
+                        <li><code>scoring</code>: Puntuación del cliente (0-5)</li>
+                        <li><code>motivo</code>: Motivo (exceso_agua, ausencia_vacaciones, null)</li>
+                        <li><code>stops_ultimo_ano</code>: Número de stops previos</li>
+                        <li><code>albaran_descargado</code>: true si es el mismo día de ruta</li>
+                        <li><code>tipo_cliente</code>: residencial, residencial_user, residencial_ma</li>
+                        <li><code>canal</code>: Chat o Telefono (afecta al formato del speech)</li>
+                        <li><b>Aviso Urgente:</b></li>
+                        <li><code>is_delivery_day</code>: true si hoy es día de reparto</li>
+                        <li><code>has_pending_usual/crm_delivery</code>: true si tiene albaranes</li>
+                        <li><code>urgent_notice_allowed_zone</code>: true si zona permite urgentes</li>
+                        <li><code>next_delivery_hours</code>: horas hasta el próximo reparto</li>
+                        <li><code>route_type</code>: "Normal" (8:00-17:00) o "Megaruta" (7:30-21:30)</li>
+                        <li><code>pending_crm_hours</code>: Horas antigüedad albarán CRM (Escenario 3)</li>
+                    </ul>
+                </details>
             </div>
         </div>
     );

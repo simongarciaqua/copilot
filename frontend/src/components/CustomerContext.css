@@ -2,15 +2,21 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    max-height: 800px;
+    /* No max-height */
 }
 
 .customer-context h2 {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     color: var(--aqua-dark);
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
+}
+
+.customer-context .subtitle {
+    margin-bottom: 10px;
+    flex-shrink: 0;
 }
 
 .editor-container {
@@ -19,6 +25,12 @@
     overflow: hidden;
     margin-bottom: 15px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    flex: 1;
+    /* Grow to fill space */
+    min-height: 0;
+    /* Allow shrinking below content size */
+    display: flex;
+    flex-direction: column;
 }
 
 .error-message {
@@ -41,6 +53,7 @@
     font-size: 15px;
     font-weight: 600;
     margin-bottom: 20px;
+    flex-shrink: 0;
 }
 
 .update-button:disabled {
@@ -54,6 +67,9 @@
     padding: 15px;
     border-radius: 8px;
     font-size: 13px;
+    flex-shrink: 0;
+    max-height: 150px;
+    overflow-y: auto;
 }
 
 .help-section h4 {
@@ -80,4 +96,16 @@
 .help-section code {
     color: var(--aqua-light);
     font-weight: 600;
+}
+
+.help-section summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 5px;
+    outline: none;
+}
+
+.help-section details[open] summary {
+    margin-bottom: 15px;
 }

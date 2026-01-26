@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './Recommendation.css';
 
-export default function Recommendation({ recommendation, loading, rulesDecision }) {
+export default function Recommendation({ recommendation, loading, rulesDecision, process }) {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = () => {
@@ -18,8 +18,19 @@ export default function Recommendation({ recommendation, loading, rulesDecision 
             'reconduccion_obligatoria_previa': 'Reconducción obligatoria requerida antes de permitir stop',
             'reconduccion_obligatoria': 'El cliente debe intentar otras opciones primero',
             'ausencia_temporal': 'El cliente estará ausente temporalmente',
+            'reconduccion_obligatoria': 'El cliente debe intentar otras opciones primero',
+            'ausencia_temporal': 'El cliente estará ausente temporalmente',
             'scoring_alto': 'Cliente con scoring alto tiene beneficios',
-            'no_rules_matched': 'No se encontraron reglas aplicables para este caso'
+            'no_rules_matched': 'No se encontraron reglas aplicables',
+            // Aviso Urgente Reasons
+            'es_dia_reparto': 'Hoy es día de reparto',
+            'albaran_usual_pendiente': 'Ya tiene un albarán USUAL pendiente',
+            'albaran_crm_pendiente': 'Ya tiene un albarán CRM pendiente',
+            'albaran_crm_en_plazo': 'Albarán CRM en plazo (<= 48h)',
+            'albaran_crm_retraso': 'Albarán CRM con retraso (> 48h)',
+            'zona_no_permitida': 'Zona no habilitada para urgentes',
+            'proximo_reparto_48h': 'Próximo reparto en < 48h',
+            'cumple_requisitos': 'Cumple todos los requisitos'
         };
         return reasonMap[reason] || reason;
     };
@@ -146,28 +157,45 @@ export default function Recommendation({ recommendation, loading, rulesDecision 
 
             <div className="info-grid">
                 <div className="info-item">
-                    <label>Stop Permitido</label>
+                    <label>{process === 'AVISO_URGENTE' ? 'Aviso Permitido' : 'Stop Permitido'}</label>
                     <div className="stop-indicator">
-                        {recommendation.stop_permitido ? (
-                            <span className="status-yes">✓ Sí</span>
-                        ) : rulesDecision?.decision === 'reconduccion' ? (
-                            <>
-                                <span className="status-reconduction">⚠ Permitido con Reconducción</span>
-                                {rulesDecision?.reason && (
-                                    <div className="reason-badge reconduction">
-                                        {getReasonText(rulesDecision.reason)}
-                                    </div>
-                                )}
-                            </>
+                        {process === 'AVISO_URGENTE' ? (
+                            // Lógica para AVISO URGENTE
+                            recommendation.aviso_permitido ? (
+                                <span className="status-yes">✓ Sí - Generar</span>
+                            ) : (
+                                <>
+                                    <span className="status-no">✗ No Permitido</span>
+                                    {rulesDecision?.reason && (
+                                        <div className="reason-badge">
+                                            {getReasonText(rulesDecision.reason)}
+                                        </div>
+                                    )}
+                                </>
+                            )
                         ) : (
-                            <>
-                                <span className="status-no">✗ No</span>
-                                {rulesDecision?.reason && (
-                                    <div className="reason-badge">
-                                        {getReasonText(rulesDecision.reason)}
-                                    </div>
-                                )}
-                            </>
+                            // Lógica para STOP REPARTO
+                            recommendation.stop_permitido ? (
+                                <span className="status-yes">✓ Sí</span>
+                            ) : rulesDecision?.decision === 'reconduccion' ? (
+                                <>
+                                    <span className="status-reconduction">⚠ Permitido con Reconducción</span>
+                                    {rulesDecision?.reason && (
+                                        <div className="reason-badge reconduction">
+                                            {getReasonText(rulesDecision.reason)}
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    <span className="status-no">✗ No</span>
+                                    {rulesDecision?.reason && (
+                                        <div className="reason-badge">
+                                            {getReasonText(rulesDecision.reason)}
+                                        </div>
+                                    )}
+                                </>
+                            )
                         )}
                     </div>
                 </div>

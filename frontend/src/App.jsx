@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ClientSimulation from './components/ClientSimulation';
 import Recommendation from './components/Recommendation';
 import CustomerContext from './components/CustomerContext';
+import VoiceCallWidget from './components/VoiceCallWidget';
 import './App.css';
 
 const DEFAULT_CONTEXT = {
@@ -11,7 +12,15 @@ const DEFAULT_CONTEXT = {
     stops_ultimo_ano: 1,
     albaran_descargado: false,
     tipo_cliente: "residencial",
-    canal: "Telefono"
+    canal: "Telefono",
+    // Aviso Urgente Fields
+    is_delivery_day: false,
+    has_pending_usual_delivery: false,
+    has_pending_crm_delivery: false,
+    urgent_notice_allowed_zone: true,
+    next_delivery_hours: 72,
+    route_type: "Normal", // Normal | Megaruta
+    pending_crm_hours: 24 // Horas desde creación del albarán CRM
 };
 
 function App() {
@@ -19,10 +28,32 @@ function App() {
     const [customerContext, setCustomerContext] = useState(DEFAULT_CONTEXT);
     const [recommendation, setRecommendation] = useState(null);
     const [rulesDecision, setRulesDecision] = useState(null);
+    const [process, setProcess] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const analyzeConversation = async (messagesToAnalyze = null) => {
+    const playAudioResponse = async (text) => {
+        try {
+            const apiBase = import.meta.env.VITE_API_URL || '';
+            const response = await fetch(`${apiBase}/api/tts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text: text,
+                    // voice_id: "JBFqnCBsd6RMkjVDRZzb" // You can omit to use backend default
+                })
+            });
+            if (response.ok) {
+                const blob = await response.blob();
+                const audio = new Audio(URL.createObjectURL(blob));
+                audio.play();
+            }
+        } catch (e) {
+            console.error("Audio playback error:", e);
+        }
+    };
+
+    const analyzeConversation = async (messagesToAnalyze = null, contextOverride = {}) => {
         const messagesArray = messagesToAnalyze || messages;
 
         if (messagesArray.length === 0) {
@@ -33,16 +64,17 @@ function App() {
         setLoading(true);
         setError(null);
 
+        // Merge current context with overrides (e.g. force channel: 'Chat' for voice)
+        const activeContext = { ...customerContext, ...contextOverride };
+
         try {
             const apiBase = import.meta.env.VITE_API_URL || '';
             const response = await fetch(`${apiBase}/api/analyze`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     messages: messagesArray,
-                    customer_context: customerContext
+                    customer_context: activeContext // Use the potentially overridden context
                 })
             });
 
@@ -54,34 +86,44 @@ function App() {
             const data = await response.json();
             setRecommendation(data.recommendation);
             setRulesDecision(data.rules_decision);
+            setProcess(data.process);
 
-            // AUTO-FILL: Si el backend ha extraído datos, actualizamos el contexto local
             if (data.enriched_context) {
+                // Determine if we should update global context or just keep it local
                 setCustomerContext(data.enriched_context);
             }
-        } catch (err) {
-            if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
-                setError("No se pudo conectar con el servidor (Backend). Asegúrate de que esté ejecutándose en el puerto 8000.");
-            } else {
-                setError(err.message);
+
+            // AUTO-PLAY VOICE RESPONSE
+            // Only play if there is a speech AND we are in voice mode (or just always for this demo)
+            if (data.recommendation && data.recommendation.speech_sugerido) {
+                console.log("Playing audio for:", data.recommendation.speech_sugerido);
+                playAudioResponse(data.recommendation.speech_sugerido);
             }
+
+        } catch (err) {
+            // ... error handling
+            setError(err.message);
             console.error('Error:', err);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSendMessage = (message) => {
+    const handleSendMessage = (message, meta = {}) => {
         const newMessages = [...messages, message];
         setMessages(newMessages);
-        // Analyze with the new messages immediately
-        analyzeConversation(newMessages);
+
+        // If message comes from voice, force 'Chat' context to get conversational speech
+        const contextOverride = meta.isVoice ? { canal: 'Chat' } : {};
+
+        analyzeConversation(newMessages, contextOverride);
     };
 
     const handleContextUpdate = () => {
         setMessages([]);
         setRecommendation(null);
         setRulesDecision(null);
+        setProcess(null);
         setError(null);
     };
 
@@ -112,6 +154,7 @@ function App() {
                         recommendation={recommendation}
                         loading={loading}
                         rulesDecision={rulesDecision}
+                        process={process}
                     />
                 </div>
 
@@ -132,6 +175,8 @@ function App() {
                     </span>
                 </p>
             </footer>
+
+            <VoiceCallWidget onSendMessage={handleSendMessage} />
         </div>
     );
 }

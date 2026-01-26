@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from rules_engine import load_rules_engine
-from agents import create_router_agent, create_stop_reparto_agent
+from agents import create_router_agent, create_stop_reparto_agent, create_aviso_urgente_agent
 
 
 # Request/Response Models
@@ -77,6 +77,17 @@ def get_stop_reparto_agent():
     return stop_reparto_agent
 
 
+# Initialize Aviso Urgente agent
+aviso_urgente_agent = None
+
+def get_aviso_urgente_agent():
+    """Get or create AVISO_URGENTE agent (lazy initialization)."""
+    global aviso_urgente_agent
+    if aviso_urgente_agent is None:
+        aviso_urgente_agent = create_aviso_urgente_agent()
+    return aviso_urgente_agent
+
+
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint."""
@@ -117,7 +128,8 @@ async def analyze_conversation(request: AnalyzeRequest):
         enriched_context = request.customer_context.copy()
         for key, value in extracted_data.items():
             current_val = enriched_context.get(key)
-            if value and (current_val is None or current_val == "" or current_val == "null"):
+            # Actualizamos si el valor extraído no es nulo y el actual está vacío o es nulo
+            if value is not None and (current_val is None or current_val == "" or current_val == "null"):
                 enriched_context[key] = value
 
         # CASO ESPECIAL: Si es charla social (SmallTalk), no lanzamos error ni evaluamos reglas
@@ -173,6 +185,13 @@ async def analyze_conversation(request: AnalyzeRequest):
                 customer_context=enriched_context,
                 rules_decision=rules_output
             )
+        elif process_name == "AVISO_URGENTE":
+            agent = get_aviso_urgente_agent()
+            recommendation = agent.generate_recommendation(
+                messages=request.messages,
+                customer_context=enriched_context,
+                rules_decision=rules_output
+            )
         else:
             raise HTTPException(
                 status_code=501,
@@ -218,7 +237,62 @@ async def list_processes():
             "has_policy": True
         })
     
+    if (base_path / "aviso_urgente").exists():
+        processes.append({
+            "name": "AVISO_URGENTE",
+            "has_rules": True,
+            "has_policy": True
+        })
+    
     return {"processes": processes}
+
+
+class TTSRequest(BaseModel):
+    text: str
+    voice_id: str = "JBFqnCBsd6RMkjVDRZzb" # Default voice if not specified
+
+
+@app.post("/api/tts")
+async def text_to_speech_proxy(request: TTSRequest):
+    """
+    Proxy endpoint for ElevenLabs Text-to-Speech to keep API key secure.
+    Returns audio/mpeg stream.
+    """
+    import httpx
+    
+    api_key = os.getenv("ELEVENLABS_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="ElevenLabs API Key not configured")
+
+    url = f"https://api.elevenlabs.io/v1/text-to-speech/{request.voice_id}"
+    
+    headers = {
+        "Accept": "audio/mpeg",
+        "Content-Type": "application/json",
+        "xi-api-key": api_key
+    }
+    
+    data = {
+        "text": request.text,
+        "model_id": "eleven_multilingual_v2", # Better for Spanish
+        "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+        }
+    }
+
+    # We need a synchronous-looking response for streaming, or just return content for simplicity in POC.
+    # For a simple widget, returning bytes is fine.
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, json=data, headers=headers, timeout=30.0)
+            response.raise_for_status()
+            
+            from fastapi.responses import Response
+            return Response(content=response.content, media_type="audio/mpeg")
+            
+        except httpx.HTTPError as e:
+            raise HTTPException(status_code=502, detail=f"ElevenLabs Error: {str(e)}")
 
 
 if __name__ == "__main__":
