@@ -93,12 +93,13 @@ function App() {
                 setCustomerContext(data.enriched_context);
             }
 
-            // AUTO-PLAY VOICE RESPONSE
-            // Only play if there is a speech AND we are in voice mode (or just always for this demo)
+            // AUTO-PLAY VOICE RESPONSE - DISABLED
+            /*
             if (data.recommendation && data.recommendation.speech_sugerido) {
                 console.log("Playing audio for:", data.recommendation.speech_sugerido);
                 playAudioResponse(data.recommendation.speech_sugerido);
             }
+            */
 
         } catch (err) {
             // ... error handling

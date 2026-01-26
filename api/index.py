@@ -7,20 +7,29 @@ Orchestrates the multi-agent pipeline:
 3. Specialist agent generates recommendation
 """
 
+import os
+import sys
+from pathlib import Path
+
+# Path hack for Vercel imports
+current_dir = Path(__file__).parent.resolve()
+parent_dir = current_dir.parent.resolve()
+
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
+
+# Debug info for Vercel logs
+print(f"DEBUG: Python Path: {sys.path}")
+print(f"DEBUG: Current Dir: {current_dir}")
+
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
-import os
-import sys
-from pathlib import Path
 from dotenv import load_dotenv
-
-# Add the current directory to sys.path to fix imports in Vercel
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
 
 # Load environment variables
 load_dotenv()
