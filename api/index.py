@@ -8,6 +8,7 @@ Orchestrates the multi-agent pipeline:
 """
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
@@ -208,12 +209,19 @@ async def analyze_conversation(request: AnalyzeRequest):
             enriched_context=enriched_context
         )
     
-    except HTTPException:
-        raise
+    except HTTPException as he:
+        # Re-raise HTTP exceptions so FastAPI handles them (returns JSON)
+        raise he
     except Exception as e:
-        raise HTTPException(
+        import traceback
+        error_msg = f"Internal Server Error: {str(e)}\n{traceback.format_exc()}"
+        print(error_msg) # Log to Vercel console
+        return JSONResponse(
             status_code=500,
-            detail=f"Internal error: {str(e)}"
+            content={
+                "detail": str(e),
+                "trace": traceback.format_exc()
+            }
         )
 
 
